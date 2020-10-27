@@ -1,2 +1,2 @@
-Vulkan Guide 
-GLFW version of Vulkan Guide available at https://vkguide.dev/ by Victor Blanco
+<b>Vulkan Guide</b><br/>
+GLFW version of Vulkan Guide available at <a href="https://vkguide.dev/">https://vkguide.dev/</a> by Victor Blanco
