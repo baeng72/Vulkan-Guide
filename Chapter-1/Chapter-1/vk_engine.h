@@ -1,5 +1,6 @@
 #pragma once
 //based on https://vkguide.dev/ by Victor Blanco
+
 #include "vk_types.h"
 #include "vk_initializers.h"
 #include "VkBootstrap.h"
@@ -251,6 +252,9 @@ public:
 		VK_CHECK(vkResetFences(_device, 1, &_renderFence));
 
 		//now that we are sure that the commands finished executing, we can safely reset the command buffer to begin recording again.
+		VK_CHECK(vkResetCommandBuffer(_mainCommandBuffer, 0));
+
+		//request image from the swapchain
 		uint32_t swapchainImageIndex;
 		VK_CHECK(vkAcquireNextImageKHR(_device, _swapchain, 0, _presentSemaphore, nullptr, &swapchainImageIndex));
 
