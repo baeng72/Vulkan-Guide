@@ -1,5 +1,5 @@
 #pragma once
-
+//based on https://vkguide.dev/ by Victor Blanco
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLM_FORCE_RADIANS

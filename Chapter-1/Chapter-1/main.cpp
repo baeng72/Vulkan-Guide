@@ -1,4 +1,4 @@
-
+//based on https://vkguide.dev/ by Victor Blanco
 #include "vk_engine.h"
 
 int main() {
