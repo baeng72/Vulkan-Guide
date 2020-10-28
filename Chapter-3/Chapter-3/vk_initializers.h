@@ -139,6 +139,7 @@ namespace vkinit {
 		info.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 		info.depthTestEnable = bDepthTest ? VK_TRUE : VK_FALSE;
 		info.depthWriteEnable = bDepthWrite ? VK_TRUE : VK_FALSE;
+		info.depthCompareOp = bDepthTest ? compareOp : VK_COMPARE_OP_ALWAYS;
 		info.depthBoundsTestEnable = VK_FALSE;
 		info.maxDepthBounds = 1.0f;
 		return info;

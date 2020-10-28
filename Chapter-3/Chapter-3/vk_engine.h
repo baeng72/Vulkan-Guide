@@ -211,6 +211,10 @@ class VulkanEngine {
 		allocatorInfo.instance = _instance;
 		vmaCreateAllocator(&allocatorInfo, &_allocator);
 
+		_mainDeletionQueue.push_function([=]() {
+			vmaDestroyAllocator(_allocator);
+			});
+
 	}
 	void init_swapchain() {
 
@@ -287,11 +291,29 @@ class VulkanEngine {
 		color_attachment_ref.attachment = 0;
 		color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+
+		//Depth attachment
+		VkAttachmentDescription depth_attachment{};
+		depth_attachment.flags = 0;
+		depth_attachment.format = _depthFormat;
+		depth_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		depth_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		depth_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		depth_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		depth_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		depth_attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		VkAttachmentReference depth_attachment_ref{};
+		depth_attachment_ref.attachment = 1;
+		depth_attachment_ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
 		//we are going to create 1 subpass, which is the minimum you can do
 		VkSubpassDescription subpass{};
 		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 		subpass.colorAttachmentCount = 1;
 		subpass.pColorAttachments = &color_attachment_ref;
+		subpass.pDepthStencilAttachment = &depth_attachment_ref;
 
 		//1 dependency, which is from "outside" into the subpass. And we can read or write color
 		VkSubpassDependency dependency{};
@@ -302,10 +324,12 @@ class VulkanEngine {
 		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
+		VkAttachmentDescription attachments[] = { color_attachment,depth_attachment };
+
 		VkRenderPassCreateInfo render_pass_info{};
 		render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		render_pass_info.attachmentCount = 1;
-		render_pass_info.pAttachments = &color_attachment;
+		render_pass_info.attachmentCount = 2;
+		render_pass_info.pAttachments = attachments;
 		render_pass_info.subpassCount = 1;
 		render_pass_info.pSubpasses = &subpass;
 		render_pass_info.dependencyCount = 1;
@@ -324,7 +348,11 @@ class VulkanEngine {
 		_framebuffers = std::vector<VkFramebuffer>(swapchain_imagecount);
 
 		for (uint32_t i = 0; i < swapchain_imagecount; i++) {
-			fb_info.pAttachments = &_swapchainImageViews[i];
+			VkImageView attachments[2];
+			attachments[0] = _swapchainImageViews[i];
+			attachments[1] = _depthImageView;
+			fb_info.pAttachments = attachments;
+			fb_info.attachmentCount = 2;
 			VK_CHECK(vkCreateFramebuffer(_device, &fb_info, nullptr, &_framebuffers[i]));
 
 			_mainDeletionQueue.push_function([=]() {
